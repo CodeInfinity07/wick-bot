@@ -13,6 +13,8 @@ import Configuration from "@/pages/configuration";
 import Settings from "@/pages/settings";
 import Members from "@/pages/members";
 import Protection from "@/pages/protection";
+import Exemptions from "@/pages/exemptions";
+import LoyalMembers from "@/pages/loyal-members";
 import ActivityLogs from "@/pages/activity-logs";
 
 function Router() {
@@ -24,6 +26,8 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/members" component={Members} />
       <Route path="/protection" component={Protection} />
+      <Route path="/exemptions" component={Exemptions} />
+      <Route path="/loyal-members" component={LoyalMembers} />
       <Route path="/logs" component={ActivityLogs} />
       <Route component={Overview} />
     </Switch>

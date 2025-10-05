@@ -13,6 +13,8 @@ const FILES = {
   SPAM_WORDS: path.join(DATA_DIR, 'spam.txt'),
   BANNED_PATTERNS: path.join(DATA_DIR, 'banned_patterns.txt'),
   ADMINS: path.join(DATA_DIR, 'admins.txt'),
+  EXEMPTIONS: path.join(DATA_DIR, 'exemptions.txt'),
+  LOYAL_MEMBERS: path.join(DATA_DIR, 'loyal_members.txt'),
   BOT_STATUS: path.join(DATA_DIR, 'bot_status.json'),
 };
 
@@ -410,6 +412,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: 'Admins saved successfully' });
     } catch (error: any) {
       console.error('Error saving admins:', error);
+      res.json({ success: false, message: error.message });
+    }
+  });
+
+  // Get exemptions
+  app.get('/api/protection/exemptions', async (req, res) => {
+    try {
+      const data = await readTextFile(FILES.EXEMPTIONS, '');
+      const exemptions = data.split(',').map(item => item.trim()).filter(item => item !== '');
+      res.json({ success: true, data: exemptions });
+    } catch (error: any) {
+      console.error('Error loading exemptions:', error);
+      res.json({ success: false, message: error.message });
+    }
+  });
+
+  // Save exemptions
+  app.put('/api/protection/exemptions', async (req, res) => {
+    try {
+      const { exemptions } = req.body;
+
+      if (!Array.isArray(exemptions)) {
+        return res.json({ success: false, message: 'Exemptions must be an array' });
+      }
+
+      const content = exemptions.join(', ');
+      await writeTextFile(FILES.EXEMPTIONS, content);
+      console.log(`Exemptions updated: ${exemptions.length} exemptions`);
+
+      res.json({ success: true, message: 'Exemptions saved successfully' });
+    } catch (error: any) {
+      console.error('Error saving exemptions:', error);
+      res.json({ success: false, message: error.message });
+    }
+  });
+
+  // Get loyal members
+  app.get('/api/protection/loyal-members', async (req, res) => {
+    try {
+      const data = await readTextFile(FILES.LOYAL_MEMBERS, '');
+      const loyalMembers = data.split(',').map(item => item.trim()).filter(item => item !== '');
+      res.json({ success: true, data: loyalMembers });
+    } catch (error: any) {
+      console.error('Error loading loyal members:', error);
+      res.json({ success: false, message: error.message });
+    }
+  });
+
+  // Save loyal members
+  app.put('/api/protection/loyal-members', async (req, res) => {
+    try {
+      const { loyalMembers } = req.body;
+
+      if (!Array.isArray(loyalMembers)) {
+        return res.json({ success: false, message: 'Loyal members must be an array' });
+      }
+
+      const content = loyalMembers.join(', ');
+      await writeTextFile(FILES.LOYAL_MEMBERS, content);
+      console.log(`Loyal members updated: ${loyalMembers.length} loyal members`);
+
+      res.json({ success: true, message: 'Loyal members saved successfully' });
+    } catch (error: any) {
+      console.error('Error saving loyal members:', error);
       res.json({ success: false, message: error.message });
     }
   });
