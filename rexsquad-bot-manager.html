@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RexSquad Bot Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --sidebar-width: 280px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #1f1f1f;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a3a3a3;
+            --border: #2a2a2a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .logo-text h2 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+            transition: background 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        .top-bar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .menu-btn:hover {
+            background: var(--bg-secondary);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .content-area {
+            padding: 2rem;
+            max-width: 1400px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.blue { background: #3b82f6; }
+        .stat-icon.green { background: #10b981; }
+        .stat-icon.amber { background: #f59e0b; }
+        .stat-icon.cyan { background: #06b6d4; }
+
+        .stat-content .value {
+            font-size: 1.875rem;
+            font-weight: 700;
+        }
+
+        .stat-content .label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .form-textarea {
+            min-height: 200px;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 0;
+        }
+
+        .members-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .member-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .member-card:hover {
+            background: var(--bg-secondary);
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .member-details h3 {
+            font-size: 0.9375rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-primary {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .badge-secondary {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.625rem 0.875rem 0.625rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bulk-actions .form-input {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bulk-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🎮</div>
+                <div class="logo-text">
+                    <h2>RexSquad Bot</h2>
+                    <p>Manager</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="navigateTo('overview')">
+                    <span>📊</span>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item" onclick="navigateTo('controls')">
+                    <span>🎮</span>
+                    <span>Bot Controls</span>
+                </div>
+                <div class="nav-item" onclick="navigateTo('configuration')">
+                    <span>⚙️</span>
+                    <span>Configuration</span>
+                </div>
+                <div class="nav-item" onclick="navigateTo('settings')">
+                    <span>🎛️</span>
+                    <span>Settings</span>
+                </div>
+                <div class="nav-item" onclick="navigateTo('members')">
+                    <span>👥</span>
+                    <span>Members</span>
+                </div>
+                <div class="nav-item" onclick="navigateTo('protection')">
+                    <span>🛡️</span>
+                    <span>Protection</span>
+                </div>
+                <div class="nav-item" onclick="navigateTo('logs')">
+                    <span>📝</span>
+                    <span>Activity Logs</span>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content" id="mainContent">
+            <div class="top-bar">
+                <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            </div>
+
+            <div class="content-area">
+                <!-- Overview Page -->
+                <div class="page active" id="overview">
+                    <div class="page-header">
+                        <h1>Dashboard Overview</h1>
+                        <p>Monitor your bot and club statistics</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">👥</div>
+                            <div class="stat-content">
+                                <div class="value" id="totalMembers">0</div>
+                                <div class="label">Total Members</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">💬</div>
+                            <div class="stat-content">
+                                <div class="value">0</div>
+                                <div class="label">Messages Today</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon amber">🛡️</div>
+                            <div class="stat-content">
+                                <div class="value" id="spamWordCount">0</div>
+                                <div class="label">Spam Words</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon cyan">✅</div>
+                            <div class="stat-content">
+                                <div class="value">Active</div>
+                                <div class="label">Bot Status</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Club Information</div>
+                            <div class="card-description">Current club details</div>
+                        </div>
+                        <p><strong>Club Name:</strong> <span id="clubName">REX SQUAD</span></p>
+                        <p><strong>Club Code:</strong> <span id="clubCode">3029915</span></p>
+                    </div>
+                </div>
+
+                <!-- Bot Controls Page -->
+                <div class="page" id="controls">
+                    <div class="page-header">
+                        <h1>Bot Controls</h1>
+                        <p>Manage bot operations</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Bot Status</div>
+                            <div class="card-description">Current operational status</div>
+                        </div>
+                        <div class="badge badge-primary">ACTIVE</div>
+                        <p style="margin-top: 1rem;">The bot is currently running</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Control Actions</div>
+                            <div class="card-description">Manage bot operations</div>
+                        </div>
+                        <button class="btn btn-primary" style="margin-right: 0.5rem;">▶️ Start Bot</button>
+                        <button class="btn btn-danger" style="margin-right: 0.5rem;">⏸️ Stop Bot</button>
+                        <button class="btn btn-outline">🔄 Restart Bot</button>
+                    </div>
+                </div>
+
+                <!-- Configuration Page -->
+                <div class="page" id="configuration">
+                    <div class="page-header">
+                        <h1>Configuration</h1>
+                        <p>Configure bot settings and behavior</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Bot Settings</div>
+                            <div class="card-description">Configure bot name and personality</div>
+                        </div>
+                        <form onsubmit="saveBotConfig(event)">
+                            <div class="form-group">
+                                <label class="form-label">Bot Name</label>
+                                <input type="text" class="form-input" id="botName" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Bot Tone</label>
+                                <select class="form-select" id="botTone" required>
+                                    <option value="upbeat">Upbeat</option>
+                                    <option value="sarcastic">Sarcastic</option>
+                                    <option value="wise">Wise</option>
+                                    <option value="energetic">Energetic</option>
+                                    <option value="chill">Chill</option>
+                                    <option value="phuppo">Phuppo</option>
+                                    <option value="gangster">Gangster</option>
+                                    <option value="party">Party</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Welcome Message</label>
+                                <input type="text" class="form-input" id="welcomeMessage" placeholder="Use {name} for user's name" required>
+                                <small style="color: var(--text-secondary);">Use {name} to insert the user's name</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">💾 Save Configuration</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div class="page" id="settings">
+                    <div class="page-header">
+                        <h1>Settings</h1>
+                        <p>Configure club and moderation settings</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Club Settings</div>
+                            <div class="card-description">Manage club permissions and restrictions</div>
+                        </div>
+                        <form onsubmit="saveSettings(event)">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <input type="checkbox" id="allowAvatars" style="margin-right: 0.5rem;">
+                                    Allow Avatars
+                                </label>
+                                <small style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">Enable or disable avatar display for members</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <input type="checkbox" id="allowGuestIds" style="margin-right: 0.5rem;">
+                                    Allow Guest IDs
+                                </label>
+                                <small style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">Permit guest accounts to join the club</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Auto-Ban Level Threshold</label>
+                                <input type="number" class="form-input" id="banLevel" min="1" max="100" required>
+                                <small style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">Members below this level will be auto-banned</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">💾 Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Members Page -->
+                <div class="page" id="members">
+                    <div class="page-header">
+                        <h1>Members</h1>
+                        <p>Manage club members</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon amber">👥</div>
+                            <div class="stat-content">
+                                <div class="value" id="lowLevelCount">0</div>
+                                <div class="label">Level 1-4</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue">👥</div>
+                            <div class="stat-content">
+                                <div class="value" id="mediumLevelCount">0</div>
+                                <div class="label">Level 5-9</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">👥</div>
+                            <div class="stat-content">
+                                <div class="value" id="highLevelCount">0</div>
+                                <div class="label">Level 10+</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Bulk Member Removal</div>
+                            <div class="card-description">Remove multiple members by level</div>
+                        </div>
+                        <form onsubmit="bulkRemoveMembers(event)" class="bulk-actions">
+                            <input type="number" class="form-input" id="bulkLevel" placeholder="Level (e.g., 5)" min="1" max="100" required>
+                            <input type="number" class="form-input" id="bulkCount" placeholder="Count (e.g., 10)" min="1" max="100" required>
+                            <button type="submit" class="btn btn-danger">🗑️ Remove Members</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Club Members</div>
+                            <div class="card-description"><span id="memberCount">0</span> members found</div>
+                        </div>
+                        <div class="search-wrapper">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="search-input" id="memberSearch" placeholder="Search members..." oninput="filterMembers()">
+                        </div>
+                        <div class="members-list" id="membersList"></div>
+                    </div>
+                </div>
+
+                <!-- Protection Page -->
+                <div class="page" id="protection">
+                    <div class="page-header">
+                        <h1>Protection</h1>
+                        <p>Manage spam filters and security settings</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Spam Words</div>
+                            <div class="card-description">One word per line (supports thousands of words)</div>
+                        </div>
+                        <form onsubmit="saveSpamWords(event)">
+                            <div class="form-group">
+                                <label class="form-label">Spam Word List</label>
+                                <textarea class="form-textarea" id="spamWords" placeholder="Enter spam words, one per line..."></textarea>
+                                <small style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">
+                                    <span id="spamWordsCount">0</span> words configured
+                                </small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">💾 Save Spam Words</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Banned Patterns</div>
+                            <div class="card-description">URL patterns to block (comma-separated)</div>
+                        </div>
+                        <form onsubmit="saveBannedPatterns(event)">
+                            <div class="form-group">
+                                <textarea class="form-textarea" id="bannedPatterns" placeholder="http://, bit.ly, discord.gg" style="min-height: 100px;"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">💾 Save Patterns</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Administrators</div>
+                            <div class="card-description">Admin usernames (comma-separated)</div>
+                        </div>
+                        <form onsubmit="saveAdmins(event)">
+                            <div class="form-group">
+                                <textarea class="form-textarea" id="admins" placeholder="Admin1, Admin2, Admin3" style="min-height: 100px;"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">💾 Save Admins</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Activity Logs Page -->
+                <div class="page" id="logs">
+                    <div class="page-header">
+                        <h1>Activity Logs</h1>
+                        <p>Real-time bot activity and events</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Recent Activity</div>
+                            <div class="card-description">Latest events and system messages</div>
+                        </div>
+                        <div class="alert alert-warning">
+                            <span>ℹ️</span>
+                            <div>Activity logging is not yet implemented. Logs will appear here when the bot is connected.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize LocalStorage with default data
+        function initializeData() {
+            if (!localStorage.getItem('members')) {
+                const defaultMembers = [
+                    { UID: 'user001', NM: 'Alex Johnson', LVL: 15 },
+                    { UID: 'user002', NM: 'Sarah Chen', LVL: 8 },
+                    { UID: 'user003', NM: 'Mike Davis', LVL: 22 },
+                    { UID: 'user004', NM: 'Emma Wilson', LVL: 5 },
+                    { UID: 'user005', NM: 'Chris Brown', LVL: 12 },
+                    { UID: 'user006', NM: 'Lisa Anderson', LVL: 3 },
+                    { UID: 'user007', NM: 'John Smith', LVL: 2 },
+                    { UID: 'user008', NM: 'Maria Garcia', LVL: 18 }
+                ];
+                localStorage.setItem('members', JSON.stringify(defaultMembers));
+            }
+
+            if (!localStorage.getItem('botConfig')) {
+                const defaultConfig = {
+                    botName: 'RexBot',
+                    botTone: 'upbeat',
+                    welcomeMessage: '✨️˚.⭒Wᴇʟᴄᴏᴍᴇ {name}˚✨️'
+                };
+                localStorage.setItem('botConfig', JSON.stringify(defaultConfig));
+            }
+
+            if (!localStorage.getItem('settings')) {
+                const defaultSettings = {
+                    allowAvatars: true,
+                    banLevel: 10,
+                    allowGuestIds: false
+                };
+                localStorage.setItem('settings', JSON.stringify(defaultSettings));
+            }
+
+            if (!localStorage.getItem('spamWords')) {
+                localStorage.setItem('spamWords', 'spam\nscam\nfake\nphishing\nclick here\nfree money\nwin now');
+            }
+
+            if (!localStorage.getItem('bannedPatterns')) {
+                localStorage.setItem('bannedPatterns', 'http://, bit.ly, discord.gg');
+            }
+
+            if (!localStorage.getItem('admins')) {
+                localStorage.setItem('admins', 'Admin1, Admin2, Admin3');
+            }
+        }
+
+        // Navigation
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(page).classList.add('active');
+            event.target.closest('.nav-item').classList.add('active');
+            
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+
+            loadPageData(page);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('visible');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Load page-specific data
+        function loadPageData(page) {
+            switch(page) {
+                case 'overview':
+                    updateOverview();
+                    break;
+                case 'configuration':
+                    loadBotConfig();
+                    break;
+                case 'settings':
+                    loadSettings();
+                    break;
+                case 'members':
+                    loadMembers();
+                    break;
+                case 'protection':
+                    loadProtection();
+                    break;
+            }
+        }
+
+        // Overview
+        function updateOverview() {
+            const members = JSON.parse(localStorage.getItem('members') || '[]');
+            const spamWords = (localStorage.getItem('spamWords') || '').split('\n').filter(w => w.trim());
+            
+            document.getElementById('totalMembers').textContent = members.length;
+            document.getElementById('spamWordCount').textContent = spamWords.length;
+        }
+
+        // Bot Configuration
+        function loadBotConfig() {
+            const config = JSON.parse(localStorage.getItem('botConfig') || '{}');
+            document.getElementById('botName').value = config.botName || '';
+            document.getElementById('botTone').value = config.botTone || 'upbeat';
+            document.getElementById('welcomeMessage').value = config.welcomeMessage || '';
+        }
+
+        function saveBotConfig(event) {
+            event.preventDefault();
+            const config = {
+                botName: document.getElementById('botName').value,
+                botTone: document.getElementById('botTone').value,
+                welcomeMessage: document.getElementById('welcomeMessage').value
+            };
+            localStorage.setItem('botConfig', JSON.stringify(config));
+            alert('✅ Bot configuration saved successfully!');
+        }
+
+        // Settings
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+            document.getElementById('allowAvatars').checked = settings.allowAvatars !== false;
+            document.getElementById('allowGuestIds').checked = settings.allowGuestIds === true;
+            document.getElementById('banLevel').value = settings.banLevel || 10;
+        }
+
+        function saveSettings(event) {
+            event.preventDefault();
+            const settings = {
+                allowAvatars: document.getElementById('allowAvatars').checked,
+                allowGuestIds: document.getElementById('allowGuestIds').checked,
+                banLevel: parseInt(document.getElementById('banLevel').value)
+            };
+            localStorage.setItem('settings', JSON.stringify(settings));
+            alert('✅ Settings saved successfully!');
+        }
+
+        // Members
+        function loadMembers() {
+            const members = JSON.parse(localStorage.getItem('members') || '[]');
+            updateMemberStats(members);
+            renderMembers(members);
+        }
+
+        function updateMemberStats(members) {
+            const lowLevel = members.filter(m => m.LVL >= 1 && m.LVL <= 4).length;
+            const mediumLevel = members.filter(m => m.LVL >= 5 && m.LVL <= 9).length;
+            const highLevel = members.filter(m => m.LVL >= 10).length;
+
+            document.getElementById('lowLevelCount').textContent = lowLevel;
+            document.getElementById('mediumLevelCount').textContent = mediumLevel;
+            document.getElementById('highLevelCount').textContent = highLevel;
+            document.getElementById('memberCount').textContent = members.length;
+        }
+
+        function renderMembers(members) {
+            const container = document.getElementById('membersList');
+            container.innerHTML = '';
+
+            members.forEach(member => {
+                const initials = member.NM.split(' ').map(n => n[0]).join('');
+                const badgeClass = member.LVL >= 10 ? 'badge-primary' : 'badge-secondary';
+                
+                const card = document.createElement('div');
+                card.className = 'member-card';
+                card.innerHTML = `
+                    <div class="member-info">
+                        <div class="member-avatar">${initials}</div>
+                        <div class="member-details">
+                            <h3>${member.NM}</h3>
+                            <span class="badge ${badgeClass}">Level ${member.LVL}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="removeMember('${member.UID}')">🗑️</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterMembers() {
+            const search = document.getElementById('memberSearch').value.toLowerCase();
+            const members = JSON.parse(localStorage.getItem('members') || '[]');
+            const filtered = members.filter(m => m.NM.toLowerCase().includes(search));
+            renderMembers(filtered);
+            document.getElementById('memberCount').textContent = filtered.length;
+        }
+
+        function removeMember(uid) {
+            if (!confirm('Are you sure you want to remove this member?')) return;
+            
+            let members = JSON.parse(localStorage.getItem('members') || '[]');
+            members = members.filter(m => m.UID !== uid);
+            localStorage.setItem('members', JSON.stringify(members));
+            loadMembers();
+            alert('✅ Member removed successfully!');
+        }
+
+        function bulkRemoveMembers(event) {
+            event.preventDefault();
+            const level = parseInt(document.getElementById('bulkLevel').value);
+            const count = parseInt(document.getElementById('bulkCount').value);
+
+            if (!confirm(`Remove ${count} members at level ${level}?`)) return;
+
+            let members = JSON.parse(localStorage.getItem('members') || '[]');
+            const membersAtLevel = members.filter(m => m.LVL === level);
+            const toRemove = membersAtLevel.slice(0, count);
+            const uidsToRemove = toRemove.map(m => m.UID);
+            
+            members = members.filter(m => !uidsToRemove.includes(m.UID));
+            localStorage.setItem('members', JSON.stringify(members));
+            
+            document.getElementById('bulkLevel').value = '';
+            document.getElementById('bulkCount').value = '';
+            loadMembers();
+            alert(`✅ Removed ${toRemove.length} members at level ${level}!`);
+        }
+
+        // Protection
+        function loadProtection() {
+            document.getElementById('spamWords').value = localStorage.getItem('spamWords') || '';
+            document.getElementById('bannedPatterns').value = localStorage.getItem('bannedPatterns') || '';
+            document.getElementById('admins').value = localStorage.getItem('admins') || '';
+            updateSpamWordsCount();
+        }
+
+        function updateSpamWordsCount() {
+            const words = document.getElementById('spamWords').value.split('\n').filter(w => w.trim());
+            document.getElementById('spamWordsCount').textContent = words.length;
+        }
+
+        document.getElementById('spamWords')?.addEventListener('input', updateSpamWordsCount);
+
+        function saveSpamWords(event) {
+            event.preventDefault();
+            localStorage.setItem('spamWords', document.getElementById('spamWords').value);
+            alert('✅ Spam words saved successfully!');
+            updateOverview();
+        }
+
+        function saveBannedPatterns(event) {
+            event.preventDefault();
+            localStorage.setItem('bannedPatterns', document.getElementById('bannedPatterns').value);
+            alert('✅ Banned patterns saved successfully!');
+        }
+
+        function saveAdmins(event) {
+            event.preventDefault();
+            localStorage.setItem('admins', document.getElementById('admins').value);
+            alert('✅ Admins saved successfully!');
+        }
+
+        // Initialize app
+        initializeData();
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        loadPageData('overview');
+    </script>
+</body>
+</html>
