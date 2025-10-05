@@ -10,19 +10,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Updates (October 5, 2025)
 
-### Bot Integration Enhancement
-- **New Bot API Endpoints**: Added comprehensive `/api/jack/*` endpoints for enhanced bot functionality
-- **OpenAI Integration**: Integrated OpenAI GPT-3.5-turbo for intelligent chat responses
-- **WebSocket Support**: Prepared WebSocket infrastructure for live bot connection
-- **Environment Configuration**: Added `.env` file support for bot credentials (CLUB_CODE, BOT_UID, EP, KEY, OPENAI_API_KEY)
-- **Dual API Structure**: Both `/api/*` (dashboard) and `/api/jack/*` (bot) endpoints now available
+### ✅ Complete API Migration to `/api/jack/*` Pattern
+- **Unified API Structure**: All frontend pages now exclusively use `/api/jack/*` endpoints
+- **Endpoints Migrated**: Members, Settings, Configuration, Protection (spam-words, banned-patterns, admins)
+- **New Features Added**: Exemptions and Loyal Members pages with dedicated API endpoints
+- **Data Format Standardized**: All POST requests use `{ data: [...] }` format
+- **Route Ordering Fixed**: Specific routes (exemptions, loyal-members) now defined before generic `:type` handlers
 
-### Bot Capabilities
-- **Member Management**: Advanced member operations with bulk actions
-- **Chat Integration**: OpenAI-powered conversational responses with customizable tone
-- **Protection Features**: Spam detection, banned pattern filtering, admin management
-- **Configuration**: Dynamic bot personality (name, tone, welcome messages)
-- **Real-time Stats**: Bot connection status, message processing, moderation stats
+### Bot Integration Enhancement
+- **Comprehensive Bot API**: 40+ game commands, chat responses, member management via `/api/jack/*`
+- **OpenAI Integration**: GPT-3.5-turbo for intelligent chat responses with customizable tone
+- **WebSocket Support**: Live club connection with auto-reconnect (requires valid credentials in .env)
+- **Environment Configuration**: `.env` file for bot credentials (CLUB_CODE, BOT_UID, EP, KEY, OPENAI_API_KEY)
+
+### New Features
+- **Exemptions System**: Manage users protected from automated moderation actions
+- **Loyal Members Tracking**: Track and manage VIP club members with special privileges
+- **Sidebar Navigation**: All pages accessible via Material Design 3 compliant sidebar
+- **Production Build**: `npm run build` compiles both frontend and backend for deployment
 
 ## System Architecture
 

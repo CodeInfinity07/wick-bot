@@ -31,15 +31,15 @@ interface BotStatusResponse {
 
 export default function Overview() {
   const { data: membersData } = useQuery<MembersResponse>({
-    queryKey: ["/api/members"],
+    queryKey: ["/api/jack/members"],
   });
 
   const { data: spamWordsData } = useQuery<ProtectionResponse>({
-    queryKey: ["/api/protection/spam-words"],
+    queryKey: ["/api/jack/config/spam-words"],
   });
 
   const { data: botStatus } = useQuery<BotStatusResponse>({
-    queryKey: ["/api/bot/status"],
+    queryKey: ["/api/jack/status"],
   });
 
   const totalMembers = membersData?.data?.total || 0;

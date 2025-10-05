@@ -1014,6 +1014,64 @@ export function setupBotIntegration(app: Express) {
     }
   });
 
+  // Get exemptions (must be before generic :type route)
+  app.get('/api/jack/config/exemptions', async (req, res) => {
+    try {
+      const data = await fs.readFile(path.join(process.cwd(), 'data', 'exemptions.txt'), 'utf8');
+      const arr = data.split(',').map(s => s.trim()).filter(s => s);
+      res.json({ success: true, data: arr });
+    } catch (error) {
+      res.json({ success: true, data: [] });
+    }
+  });
+
+  // Save exemptions (must be before generic :type route)
+  app.post('/api/jack/config/exemptions', async (req, res) => {
+    try {
+      const { data } = req.body;
+      if (!Array.isArray(data)) {
+        return res.json({ success: false, message: 'Invalid data format' });
+      }
+      
+      const fileContent = data.join(', ');
+      await fs.writeFile(path.join(process.cwd(), 'data', 'exemptions.txt'), fileContent, 'utf8');
+      logger.info(`Exemptions updated: ${data.length} items`);
+      
+      res.json({ success: true, message: 'Exemptions saved' });
+    } catch (error) {
+      res.json({ success: false, message: 'Failed to save exemptions' });
+    }
+  });
+
+  // Get loyal members (must be before generic :type route)
+  app.get('/api/jack/config/loyal-members', async (req, res) => {
+    try {
+      const data = await fs.readFile(path.join(process.cwd(), 'data', 'loyal_members.txt'), 'utf8');
+      const arr = data.split(',').map(s => s.trim()).filter(s => s);
+      res.json({ success: true, data: arr });
+    } catch (error) {
+      res.json({ success: true, data: [] });
+    }
+  });
+
+  // Save loyal members (must be before generic :type route)
+  app.post('/api/jack/config/loyal-members', async (req, res) => {
+    try {
+      const { data } = req.body;
+      if (!Array.isArray(data)) {
+        return res.json({ success: false, message: 'Invalid data format' });
+      }
+      
+      const fileContent = data.join(', ');
+      await fs.writeFile(path.join(process.cwd(), 'data', 'loyal_members.txt'), fileContent, 'utf8');
+      logger.info(`Loyal members updated: ${data.length} items`);
+      
+      res.json({ success: true, message: 'Loyal members saved' });
+    } catch (error) {
+      res.json({ success: false, message: 'Failed to save loyal members' });
+    }
+  });
+
   // Load configuration (admins, spam-words, banned-patterns)
   app.get('/api/jack/config/:type', async (req, res) => {
     try {

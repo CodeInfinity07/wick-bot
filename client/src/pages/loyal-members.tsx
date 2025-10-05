@@ -17,7 +17,7 @@ export default function LoyalMembers() {
   const [loyalMembers, setLoyalMembers] = useState("");
 
   const { data: loyalMembersData, isLoading, isError } = useQuery<LoyalMembersData>({
-    queryKey: ["/api/protection/loyal-members"],
+    queryKey: ["/api/jack/config/loyal-members"],
   });
 
   useEffect(() => {
@@ -28,10 +28,10 @@ export default function LoyalMembers() {
 
   const saveLoyalMembersMutation = useMutation({
     mutationFn: async (membersList: string[]) => {
-      return await apiRequest("PUT", "/api/protection/loyal-members", { loyalMembers: membersList });
+      return await apiRequest("POST", "/api/jack/config/loyal-members", { data: membersList });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/protection/loyal-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/config/loyal-members"] });
       toast({
         title: "Success",
         description: "Loyal members saved successfully",

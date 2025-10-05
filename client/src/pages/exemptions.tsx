@@ -17,7 +17,7 @@ export default function Exemptions() {
   const [exemptions, setExemptions] = useState("");
 
   const { data: exemptionsData, isLoading, isError } = useQuery<ExemptionsData>({
-    queryKey: ["/api/protection/exemptions"],
+    queryKey: ["/api/jack/config/exemptions"],
   });
 
   useEffect(() => {
@@ -28,10 +28,10 @@ export default function Exemptions() {
 
   const saveExemptionsMutation = useMutation({
     mutationFn: async (exemptionsList: string[]) => {
-      return await apiRequest("PUT", "/api/protection/exemptions", { exemptions: exemptionsList });
+      return await apiRequest("POST", "/api/jack/config/exemptions", { data: exemptionsList });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/protection/exemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/config/exemptions"] });
       toast({
         title: "Success",
         description: "Exemptions saved successfully",

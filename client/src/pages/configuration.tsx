@@ -31,7 +31,7 @@ export default function Configuration() {
   const { toast } = useToast();
 
   const { data, isLoading, isError } = useQuery<BotConfigResponse>({
-    queryKey: ["/api/config/bot"],
+    queryKey: ["/api/jack/bot-config"],
   });
 
   const form = useForm<BotConfig>({
@@ -50,10 +50,10 @@ export default function Configuration() {
 
   const saveMutation = useMutation({
     mutationFn: async (values: BotConfig) => {
-      return await apiRequest("PUT", "/api/config/bot", values);
+      return await apiRequest("POST", "/api/jack/bot-config", values);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/config/bot"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/bot-config"] });
       toast({
         title: "Success",
         description: "Bot configuration saved successfully",
