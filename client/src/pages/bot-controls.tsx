@@ -24,16 +24,16 @@ export default function BotControls() {
   const { toast } = useToast();
 
   const { data, isLoading, isError } = useQuery<BotStatusResponse>({
-    queryKey: ["/api/bot/status"],
+    queryKey: ["/api/jack/status"],
     refetchInterval: 5000,
   });
 
   const startMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/bot/start");
+      return await apiRequest("POST", "/api/jack/connect");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/bot/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/status"] });
       toast({
         title: "Bot Started",
         description: "The bot has been started successfully.",
@@ -50,10 +50,10 @@ export default function BotControls() {
 
   const stopMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/bot/stop");
+      return await apiRequest("POST", "/api/jack/disconnect");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/bot/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/status"] });
       toast({
         title: "Bot Stopped",
         description: "The bot has been stopped successfully.",
@@ -70,10 +70,10 @@ export default function BotControls() {
 
   const restartMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/bot/restart");
+      return await apiRequest("POST", "/api/jack/restart");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/bot/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/status"] });
       toast({
         title: "Bot Restarted",
         description: "The bot has been restarted successfully.",
@@ -93,7 +93,7 @@ export default function BotControls() {
       return await apiRequest("POST", "/api/bot/clear-cache");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/bot/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/status"] });
       toast({
         title: "Cache Cleared",
         description: "Bot cache has been cleared successfully.",

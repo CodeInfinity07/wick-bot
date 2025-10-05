@@ -18,15 +18,15 @@ export default function Protection() {
   const { toast } = useToast();
 
   const { data: spamWordsData, isLoading: spamLoading, isError: spamError } = useQuery<ProtectionData>({
-    queryKey: ["/api/protection/spam-words"],
+    queryKey: ["/api/jack/config/spam-words"],
   });
 
   const { data: bannedPatternsData, isLoading: patternsLoading, isError: patternsError } = useQuery<ProtectionData>({
-    queryKey: ["/api/protection/banned-patterns"],
+    queryKey: ["/api/jack/config/banned-patterns"],
   });
 
   const { data: adminsData, isLoading: adminsLoading, isError: adminsError } = useQuery<ProtectionData>({
-    queryKey: ["/api/protection/admins"],
+    queryKey: ["/api/jack/config/admins"],
   });
 
   const [spamWords, setSpamWords] = useState("");
@@ -53,10 +53,10 @@ export default function Protection() {
 
   const saveSpamWordsMutation = useMutation({
     mutationFn: async (words: string[]) => {
-      return await apiRequest("PUT", "/api/protection/spam-words", { words });
+      return await apiRequest("POST", "/api/jack/config/spam-words", { data: words });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/protection/spam-words"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/config/spam-words"] });
       toast({
         title: "Success",
         description: "Spam words saved successfully",
@@ -73,10 +73,10 @@ export default function Protection() {
 
   const saveBannedPatternsMutation = useMutation({
     mutationFn: async (patterns: string[]) => {
-      return await apiRequest("PUT", "/api/protection/banned-patterns", { patterns });
+      return await apiRequest("POST", "/api/jack/config/banned-patterns", { data: patterns });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/protection/banned-patterns"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/config/banned-patterns"] });
       toast({
         title: "Success",
         description: "Banned patterns saved successfully",
@@ -93,10 +93,10 @@ export default function Protection() {
 
   const saveAdminsMutation = useMutation({
     mutationFn: async (adminList: string[]) => {
-      return await apiRequest("PUT", "/api/protection/admins", { admins: adminList });
+      return await apiRequest("POST", "/api/jack/config/admins", { data: adminList });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/protection/admins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/config/admins"] });
       toast({
         title: "Success",
         description: "Admins saved successfully",

@@ -31,7 +31,7 @@ export default function Settings() {
   const { toast } = useToast();
 
   const { data, isLoading, isError } = useQuery<SettingsResponse>({
-    queryKey: ["/api/settings"],
+    queryKey: ["/api/jack/settings"],
   });
 
   const form = useForm<Settings>({
@@ -50,10 +50,10 @@ export default function Settings() {
 
   const saveMutation = useMutation({
     mutationFn: async (values: Settings) => {
-      return await apiRequest("PUT", "/api/settings", values);
+      return await apiRequest("PUT", "/api/jack/settings", values);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/settings"] });
       toast({
         title: "Success",
         description: "Settings saved successfully",
