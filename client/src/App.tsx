@@ -16,7 +16,6 @@ import Protection from "@/pages/protection";
 import Exemptions from "@/pages/exemptions";
 import LoyalMembers from "@/pages/loyal-members";
 import ActivityLogs from "@/pages/activity-logs";
-import { initializeLocalStorage } from "@/lib/localStorage";
 
 function Router() {
   return (
@@ -36,8 +35,6 @@ function Router() {
 }
 
 export default function App() {
-  initializeLocalStorage();
-
   const style = {
     "--sidebar-width": "280px",
     "--sidebar-width-icon": "4rem",

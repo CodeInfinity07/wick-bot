@@ -39,15 +39,15 @@ export default function Members() {
   const { toast } = useToast();
 
   const { data, isLoading, isError } = useQuery<MembersResponse>({
-    queryKey: ["/api/jack/members"],
+    queryKey: ["/api/members"],
   });
 
   const removeMemberMutation = useMutation({
     mutationFn: async (uid: string) => {
-      return await apiRequest("DELETE", `/api/jack/members/${uid}`);
+      return await apiRequest("DELETE", `/api/members/${uid}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/jack/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       toast({
         title: "Success",
         description: "Member removed successfully",
@@ -64,10 +64,10 @@ export default function Members() {
 
   const bulkRemoveMutation = useMutation({
     mutationFn: async (data: { level: number; count: number }) => {
-      return await apiRequest("POST", "/api/jack/members/bulk-remove", data);
+      return await apiRequest("POST", "/api/members/bulk-remove", data);
     },
     onSuccess: (response: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/jack/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       toast({
         title: "Success",
         description: response.message || "Members removed successfully",
