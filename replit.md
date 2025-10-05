@@ -8,6 +8,22 @@ RexSquad Bot Manager is a comprehensive web-based dashboard for managing a chat 
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Updates (October 5, 2025)
+
+### Bot Integration Enhancement
+- **New Bot API Endpoints**: Added comprehensive `/api/jack/*` endpoints for enhanced bot functionality
+- **OpenAI Integration**: Integrated OpenAI GPT-3.5-turbo for intelligent chat responses
+- **WebSocket Support**: Prepared WebSocket infrastructure for live bot connection
+- **Environment Configuration**: Added `.env` file support for bot credentials (CLUB_CODE, BOT_UID, EP, KEY, OPENAI_API_KEY)
+- **Dual API Structure**: Both `/api/*` (dashboard) and `/api/jack/*` (bot) endpoints now available
+
+### Bot Capabilities
+- **Member Management**: Advanced member operations with bulk actions
+- **Chat Integration**: OpenAI-powered conversational responses with customizable tone
+- **Protection Features**: Spam detection, banned pattern filtering, admin management
+- **Configuration**: Dynamic bot personality (name, tone, welcome messages)
+- **Real-time Stats**: Bot connection status, message processing, moderation stats
+
 ## System Architecture
 
 ### Frontend Architecture
