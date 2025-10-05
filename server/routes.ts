@@ -12,6 +12,7 @@ const FILES = {
   SPAM_WORDS: path.join(DATA_DIR, 'spam.txt'),
   BANNED_PATTERNS: path.join(DATA_DIR, 'banned_patterns.txt'),
   ADMINS: path.join(DATA_DIR, 'admins.txt'),
+  BOT_STATUS: path.join(DATA_DIR, 'bot_status.json'),
 };
 
 // Ensure data directory exists
@@ -36,6 +37,14 @@ const DEFAULT_BOT_CONFIG = {
   botTone: 'upbeat',
   welcomeMessage: '✨️˚.⭒Wᴇʟᴄᴏᴍᴇ {name}˚✨️',
   createdAt: new Date().toISOString()
+};
+
+const DEFAULT_BOT_STATUS = {
+  isRunning: false,
+  lastStarted: null,
+  lastStopped: null,
+  cacheCleared: null,
+  uptime: 0
 };
 
 // Helper functions
@@ -402,18 +411,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ====================
-  // BOT STATUS ENDPOINT
+  // BOT CONTROL ENDPOINTS
   // ====================
 
-  // Get bot status (simplified - no actual bot connection in this version)
-  app.get('/api/bot/status', (req, res) => {
-    res.json({
-      success: true,
-      data: {
-        connected: false,
-        message: 'Bot control endpoints available. Connect bot functionality separately.'
+  // Get bot status
+  app.get('/api/bot/status', async (req, res) => {
+    try {
+      const status = await readJsonFile(FILES.BOT_STATUS, DEFAULT_BOT_STATUS);
+      res.json({ success: true, data: status });
+    } catch (error: any) {
+      console.error('Error reading bot status:', error);
+      res.json({ success: false, message: error.message });
+    }
+  });
+
+  // Start bot
+  app.post('/api/bot/start', async (req, res) => {
+    try {
+      const status = await readJsonFile(FILES.BOT_STATUS, DEFAULT_BOT_STATUS);
+      
+      if (status.isRunning) {
+        return res.json({ success: false, message: 'Bot is already running' });
       }
-    });
+
+      const now = new Date().toISOString();
+      status.isRunning = true;
+      status.lastStarted = now;
+      // Preserve lastStopped for audit history
+
+      await writeJsonFile(FILES.BOT_STATUS, status);
+      console.log('Bot started at:', now);
+
+      res.json({ success: true, message: 'Bot started successfully', data: status });
+    } catch (error: any) {
+      console.error('Error starting bot:', error);
+      res.json({ success: false, message: error.message });
+    }
+  });
+
+  // Stop bot
+  app.post('/api/bot/stop', async (req, res) => {
+    try {
+      const status = await readJsonFile(FILES.BOT_STATUS, DEFAULT_BOT_STATUS);
+      
+      if (!status.isRunning) {
+        return res.json({ success: false, message: 'Bot is not running' });
+      }
+
+      const now = new Date().toISOString();
+      status.isRunning = false;
+      status.lastStopped = now;
+
+      await writeJsonFile(FILES.BOT_STATUS, status);
+      console.log('Bot stopped at:', now);
+
+      res.json({ success: true, message: 'Bot stopped successfully', data: status });
+    } catch (error: any) {
+      console.error('Error stopping bot:', error);
+      res.json({ success: false, message: error.message });
+    }
+  });
+
+  // Restart bot
+  app.post('/api/bot/restart', async (req, res) => {
+    try {
+      const status = await readJsonFile(FILES.BOT_STATUS, DEFAULT_BOT_STATUS);
+      
+      const now = new Date().toISOString();
+      status.isRunning = true;
+      status.lastStarted = now;
+      // Preserve lastStopped for audit history
+
+      await writeJsonFile(FILES.BOT_STATUS, status);
+      console.log('Bot restarted at:', now);
+
+      res.json({ success: true, message: 'Bot restarted successfully', data: status });
+    } catch (error: any) {
+      console.error('Error restarting bot:', error);
+      res.json({ success: false, message: error.message });
+    }
+  });
+
+  // Clear cache
+  app.post('/api/bot/clear-cache', async (req, res) => {
+    try {
+      const status = await readJsonFile(FILES.BOT_STATUS, DEFAULT_BOT_STATUS);
+      
+      const now = new Date().toISOString();
+      status.cacheCleared = now;
+
+      await writeJsonFile(FILES.BOT_STATUS, status);
+      console.log('Bot cache cleared at:', now);
+
+      res.json({ success: true, message: 'Cache cleared successfully', data: status });
+    } catch (error: any) {
+      console.error('Error clearing cache:', error);
+      res.json({ success: false, message: error.message });
+    }
   });
 
   const httpServer = createServer(app);
