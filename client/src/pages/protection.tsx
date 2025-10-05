@@ -1,13 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 //todo: remove mock functionality
-const initialSpamWords = ["spam", "scam", "fake", "phishing"];
+const initialSpamWords = "spam\nscam\nfake\nphishing\nclick here\nfree money\nwin now";
 const initialBannedPatterns = ["http://", "bit.ly", "discord.gg"];
 const initialAdmins = ["Admin1", "Admin2", "Admin3"];
 
@@ -15,22 +17,13 @@ export default function Protection() {
   const [spamWords, setSpamWords] = useState(initialSpamWords);
   const [bannedPatterns, setBannedPatterns] = useState(initialBannedPatterns);
   const [admins, setAdmins] = useState(initialAdmins);
-  const [newSpamWord, setNewSpamWord] = useState("");
   const [newPattern, setNewPattern] = useState("");
   const [newAdmin, setNewAdmin] = useState("");
   const { toast } = useToast();
 
-  const addSpamWord = () => {
-    if (newSpamWord.trim()) {
-      setSpamWords([...spamWords, newSpamWord.trim()]);
-      setNewSpamWord("");
-      toast({ title: "Spam Word Added", description: `"${newSpamWord}" has been added to the spam filter` });
-    }
-  };
-
-  const removeSpamWord = (word: string) => {
-    setSpamWords(spamWords.filter(w => w !== word));
-    toast({ title: "Spam Word Removed", description: `"${word}" has been removed` });
+  const handleSaveSpamWords = () => {
+    console.log("Save spam words:", spamWords);
+    toast({ title: "Spam Words Saved", description: "Spam word list has been updated" });
   };
 
   const addPattern = () => {
@@ -70,31 +63,26 @@ export default function Protection() {
         <Card>
           <CardHeader>
             <CardTitle>Spam Words</CardTitle>
-            <CardDescription>Words that trigger spam detection</CardDescription>
+            <CardDescription>One word per line (supports thousands of words)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Add spam word..."
-                value={newSpamWord}
-                onChange={(e) => setNewSpamWord(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addSpamWord()}
-                data-testid="input-spam-word"
+            <div className="space-y-2">
+              <Label htmlFor="spam-words-textarea">Spam Word List</Label>
+              <Textarea
+                id="spam-words-textarea"
+                placeholder="Enter spam words, one per line..."
+                value={spamWords}
+                onChange={(e) => setSpamWords(e.target.value)}
+                className="min-h-[200px] font-mono text-sm"
+                data-testid="textarea-spam-words"
               />
-              <Button onClick={addSpamWord} size="icon" data-testid="button-add-spam-word">
-                <Plus className="h-4 w-4" />
-              </Button>
+              <p className="text-xs text-muted-foreground">
+                {spamWords.split('\n').filter(w => w.trim()).length} words configured
+              </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {spamWords.map((word) => (
-                <Badge key={word} variant="secondary" className="gap-1" data-testid={`spam-word-${word}`}>
-                  {word}
-                  <button onClick={() => removeSpamWord(word)} className="ml-1">
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
+            <Button onClick={handleSaveSpamWords} className="w-full" data-testid="button-save-spam-words">
+              Save Spam Words
+            </Button>
           </CardContent>
         </Card>
 
