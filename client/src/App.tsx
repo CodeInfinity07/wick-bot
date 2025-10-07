@@ -8,6 +8,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/top-bar";
 import Overview from "@/pages/overview";
+import Commands from "@/pages/commands";
+import PlayerLookup from "@/pages/players";
 import BotControls from "@/pages/bot-controls";
 import Configuration from "@/pages/configuration";
 import Settings from "@/pages/settings";
@@ -28,6 +30,8 @@ function Router() {
       <Route path="/protection" component={Protection} />
       <Route path="/exemptions" component={Exemptions} />
       <Route path="/loyal-members" component={LoyalMembers} />
+      <Route path="/players" component={PlayerLookup} />
+      <Route path="/commands" component={Commands} />
       <Route path="/logs" component={ActivityLogs} />
       <Route component={Overview} />
     </Switch>

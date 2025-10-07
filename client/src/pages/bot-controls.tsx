@@ -28,46 +28,6 @@ export default function BotControls() {
     refetchInterval: 5000,
   });
 
-  const startMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/jack/restart");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/jack/status"] });
-      toast({
-        title: "Bot Started",
-        description: "The bot has been started successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to start bot",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const stopMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/jack/restart");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/jack/status"] });
-      toast({
-        title: "Bot Stopped",
-        description: "The bot has been stopped successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to stop bot",
-        variant: "destructive",
-      });
-    },
-  });
-
   const restartMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", "/api/jack/restart");
@@ -83,26 +43,6 @@ export default function BotControls() {
       toast({
         title: "Error",
         description: error.message || "Failed to restart bot",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const clearCacheMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/jack/clear-cache");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/jack/status"] });
-      toast({
-        title: "Cache Cleared",
-        description: "Bot cache has been cleared successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to clear cache",
         variant: "destructive",
       });
     },
@@ -141,7 +81,6 @@ export default function BotControls() {
   }
 
   const botStatus = data?.data;
-  const isRunning = botStatus?.isRunning;
 
   return (
     <div className="space-y-6">
@@ -159,10 +98,10 @@ export default function BotControls() {
                 <CardTitle>Bot Status</CardTitle>
               </div>
               <Badge
-                variant={isRunning ? "default" : "secondary"}
+                variant="default"
                 data-testid="badge-bot-status"
               >
-                {isRunning ? "Running" : "Stopped"}
+                Running
               </Badge>
             </div>
             <CardDescription>Current operational status</CardDescription>
@@ -200,13 +139,12 @@ export default function BotControls() {
         <Card>
           <CardHeader>
             <CardTitle>Control Panel</CardTitle>
-            <CardDescription>Start, stop, or manage the bot</CardDescription>
+            <CardDescription>Restart the bot to apply changes</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
               <Button
-                onClick={() => startMutation.mutate()}
-                disabled={isRunning || startMutation.isPending}
+                disabled
                 className="w-full"
                 data-testid="button-start-bot"
               >
@@ -214,8 +152,7 @@ export default function BotControls() {
                 Start
               </Button>
               <Button
-                onClick={() => stopMutation.mutate()}
-                disabled={!isRunning || stopMutation.isPending}
+                disabled
                 variant="destructive"
                 className="w-full"
                 data-testid="button-stop-bot"
@@ -226,16 +163,14 @@ export default function BotControls() {
               <Button
                 onClick={() => restartMutation.mutate()}
                 disabled={restartMutation.isPending}
-                variant="secondary"
-                className="w-full"
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
                 data-testid="button-restart-bot"
               >
                 <RotateCw className="mr-2 h-4 w-4" />
                 Restart
               </Button>
               <Button
-                onClick={() => clearCacheMutation.mutate()}
-                disabled={clearCacheMutation.isPending}
+                disabled
                 variant="outline"
                 className="w-full"
                 data-testid="button-clear-cache"

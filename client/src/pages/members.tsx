@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Search, Users, TrendingUp, TrendingDown } from "lucide-react";
+import { Trash2, Search, Users, TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -36,10 +36,22 @@ export default function Members() {
   const [searchQuery, setSearchQuery] = useState("");
   const [bulkLevel, setBulkLevel] = useState("");
   const [bulkCount, setBulkCount] = useState("");
+  const [page, setPage] = useState(1);
+  const limit = 10;
   const { toast } = useToast();
 
+  const buildUrl = () => {
+    const params = new URLSearchParams();
+    params.append("page", page.toString());
+    params.append("limit", limit.toString());
+    if (searchQuery) {
+      params.append("search", searchQuery);
+    }
+    return `/api/jack/members?${params.toString()}`;
+  };
+
   const { data, isLoading, isError } = useQuery<MembersResponse>({
-    queryKey: ["/api/jack/members"],
+    queryKey: [buildUrl()],
   });
 
   const removeMemberMutation = useMutation({
@@ -90,8 +102,7 @@ export default function Members() {
     }
   };
 
-  const handleBulkRemove = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleBulkRemove = () => {
     const level = parseInt(bulkLevel);
     const count = parseInt(bulkCount);
 
@@ -109,11 +120,30 @@ export default function Members() {
     }
   };
 
-  const filteredMembers = data?.data.members.filter((member) =>
-    member.NM.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    setPage(1);
+  };
 
-  const stats = data?.data.levelStats;
+  const handlePreviousPage = () => {
+    setPage((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    if (data && data.data && data.data.totalPages) {
+      setPage((prev) => Math.min(data.data.totalPages, prev + 1));
+    }
+  };
+
+  const handlePageClick = (pageNum: number) => {
+    setPage(pageNum);
+  };
+
+  const members = data?.data?.members || [];
+  const stats = data?.data?.levelStats;
+  const currentPage = data?.data?.page || 1;
+  const totalPages = data?.data?.totalPages || 1;
+  const total = data?.data?.total || 0;
 
   const getInitials = (name: string) => {
     return name
@@ -121,6 +151,76 @@ export default function Members() {
       .map((n) => n[0])
       .join("")
       .toUpperCase();
+  };
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    if (startPage > 1) {
+      pages.push(
+        <Button
+          key={1}
+          variant="outline"
+          size="sm"
+          onClick={() => handlePageClick(1)}
+          data-testid="button-page-1"
+        >
+          1
+        </Button>
+      );
+      if (startPage > 2) {
+        pages.push(
+          <span key="ellipsis-start" className="px-2">
+            ...
+          </span>
+        );
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <Button
+          key={i}
+          variant={i === currentPage ? "default" : "outline"}
+          size="sm"
+          onClick={() => handlePageClick(i)}
+          data-testid={`button-page-${i}`}
+        >
+          {i}
+        </Button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pages.push(
+          <span key="ellipsis-end" className="px-2">
+            ...
+          </span>
+        );
+      }
+      pages.push(
+        <Button
+          key={totalPages}
+          variant="outline"
+          size="sm"
+          onClick={() => handlePageClick(totalPages)}
+          data-testid={`button-page-${totalPages}`}
+        >
+          {totalPages}
+        </Button>
+      );
+    }
+
+    return pages;
   };
 
   if (isLoading) {
@@ -203,7 +303,7 @@ export default function Members() {
           <CardDescription>Remove multiple members by level</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleBulkRemove} className="flex gap-4">
+          <div className="flex gap-4">
             <Input
               type="number"
               placeholder="Level (e.g., 5)"
@@ -223,7 +323,7 @@ export default function Members() {
               data-testid="input-bulk-count"
             />
             <Button
-              type="submit"
+              onClick={handleBulkRemove}
               variant="destructive"
               disabled={bulkRemoveMutation.isPending}
               data-testid="button-bulk-remove"
@@ -231,7 +331,7 @@ export default function Members() {
               <Trash2 className="mr-2 h-4 w-4" />
               {bulkRemoveMutation.isPending ? "Removing..." : "Remove"}
             </Button>
-          </form>
+          </div>
         </CardContent>
       </Card>
 
@@ -239,7 +339,7 @@ export default function Members() {
         <CardHeader>
           <CardTitle>Club Members</CardTitle>
           <CardDescription>
-            <span data-testid="text-member-count">{filteredMembers.length}</span> members found
+            <span data-testid="text-member-count">{total}</span> total members
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -248,17 +348,17 @@ export default function Members() {
             <Input
               placeholder="Search members..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="pl-10"
               data-testid="input-search-members"
             />
           </div>
 
           <div className="space-y-3">
-            {filteredMembers.length === 0 ? (
+            {members.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">No members found</p>
             ) : (
-              filteredMembers.map((member) => (
+              members.map((member) => (
                 <div
                   key={member.UID}
                   className="flex items-center justify-between p-4 border rounded-lg hover-elevate"
@@ -293,6 +393,42 @@ export default function Members() {
               ))
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                  data-testid="button-previous-page"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                
+                <div className="hidden sm:flex items-center gap-1">
+                  {renderPageNumbers()}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  data-testid="button-next-page"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

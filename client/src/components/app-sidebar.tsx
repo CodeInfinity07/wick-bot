@@ -1,4 +1,4 @@
-import { Home, Gamepad2, Settings, Sliders, Users, Shield, UserCheck, Star, Terminal } from "lucide-react";
+import { Home, Gamepad2, Settings, Sliders, Shield, Command, UserCheck, Users, UserSearch, Star, Terminal } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -22,6 +22,8 @@ const menuItems = [
   { title: "Protection", url: "/protection", icon: Shield },
   { title: "Exemptions", url: "/exemptions", icon: UserCheck },
   { title: "Loyal Members", url: "/loyal-members", icon: Star },
+  { title: "Players", url: "/players", icon: UserSearch },
+  { title: "Commands", url: "/commands", icon: Command },
   { title: "Activity Logs", url: "/logs", icon: Terminal },
 ];
 

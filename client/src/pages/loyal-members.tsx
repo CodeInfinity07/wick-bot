@@ -17,7 +17,7 @@ export default function LoyalMembers() {
   const [loyalMembers, setLoyalMembers] = useState("");
 
   const { data: loyalMembersData, isLoading, isError } = useQuery<LoyalMembersData>({
-    queryKey: ["/api/jack/config/loyal-members"],
+    queryKey: ["/api/jack/config/loyal_members"],
   });
 
   useEffect(() => {
@@ -28,10 +28,10 @@ export default function LoyalMembers() {
 
   const saveLoyalMembersMutation = useMutation({
     mutationFn: async (membersList: string[]) => {
-      return await apiRequest("POST", "/api/jack/config/loyal-members", { data: membersList });
+      return await apiRequest("POST", "/api/jack/config/loyal_members", { data: membersList });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/jack/config/loyal-members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/jack/config/loyal_members"] });
       toast({
         title: "Success",
         description: "Loyal members saved successfully",
@@ -69,7 +69,7 @@ export default function LoyalMembers() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold" data-testid="heading-loyal-members">Loyal Members</h1>
+        <h1 className="text-3xl font-bold" data-testid="heading-loyal_members">Loyal Members</h1>
         <p className="text-muted-foreground mt-2">
           Manage your loyal and trusted club members
         </p>
@@ -93,13 +93,13 @@ export default function LoyalMembers() {
               onChange={(e) => setLoyalMembers(e.target.value)}
               className="min-h-[200px] font-mono text-sm"
               disabled={isLoading || saveLoyalMembersMutation.isPending}
-              data-testid="textarea-loyal-members"
+              data-testid="textarea-loyal_members"
             />
             <div className="flex justify-end">
               <Button
                 type="submit"
                 disabled={isLoading || saveLoyalMembersMutation.isPending}
-                data-testid="button-save-loyal-members"
+                data-testid="button-save-loyal_members"
               >
                 <Save className="h-4 w-4 mr-2" />
                 {saveLoyalMembersMutation.isPending ? "Saving..." : "Save Changes"}
