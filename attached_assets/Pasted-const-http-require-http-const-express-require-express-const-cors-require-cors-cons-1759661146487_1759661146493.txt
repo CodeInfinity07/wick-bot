@@ -1641,7 +1641,7 @@ async function connectWebSocket() {
                 }
               }
 
-              else if (String(message).startsWith("/iv")) {
+              else if (String(message).startsWith("/icic")) {
                 const user_id = findPlayerID(jsonMessage.PY.UID);
                 try {
                   if (botConfig.admins.includes(user_id)) {
@@ -1843,7 +1843,7 @@ async function connectWebSocket() {
             PY: JSON.stringify({
               CI: `${club_code}`,
               AP: true,
-              CN: "BAASH",
+              CN: `${club_name}`,
               snuid: `${user}`
             })
           })).catch(error => {

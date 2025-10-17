@@ -108,11 +108,11 @@ export default function Overview() {
           <CardContent className="space-y-2">
             <div>
               <p className="text-sm text-muted-foreground">Club Name</p>
-              <p className="font-semibold" data-testid="text-club-name">REX SQUAD</p>
+              <p className="font-semibold" data-testid="text-club-name">🗽BoNe BrEaKeR🎏</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Club Code</p>
-              <p className="font-semibold" data-testid="text-club-code">3029915</p>
+              <p className="font-semibold" data-testid="text-club-code">9294611</p>
             </div>
           </CardContent>
         </Card>

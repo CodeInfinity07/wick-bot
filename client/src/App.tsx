@@ -49,7 +49,7 @@ export default function App() {
       <TooltipProvider>
         <ThemeProvider>
           <SidebarProvider style={style as React.CSSProperties}>
-            <div className="flex h-screen w-full">
+            <div className="flex w-full">
               <AppSidebar />
               <div className="flex flex-col flex-1 overflow-hidden">
                 <TopBar />

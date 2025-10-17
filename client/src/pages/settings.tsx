@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Save } from "lucide-react";
+import { Save, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -15,6 +16,13 @@ const settingsSchema = z.object({
   allowAvatars: z.boolean(),
   allowGuestIds: z.boolean(),
   banLevel: z.coerce.number().min(1).max(100),
+  punishments: z.object({
+    bannedPatterns: z.enum(['ban', 'kick']),
+    lowLevel: z.enum(['ban', 'kick']),
+    noGuestId: z.enum(['ban', 'kick']),
+    noAvatar: z.enum(['ban', 'kick']),
+    spamWords: z.enum(['ban', 'kick']),
+  }),
 });
 
 type Settings = z.infer<typeof settingsSchema>;
@@ -40,11 +48,25 @@ export default function Settings() {
       allowAvatars: data?.data.allowAvatars ?? true,
       allowGuestIds: data?.data.allowGuestIds ?? false,
       banLevel: data?.data.banLevel ?? 10,
+      punishments: {
+        bannedPatterns: data?.data.punishments?.bannedPatterns ?? 'ban',
+        lowLevel: data?.data.punishments?.lowLevel ?? 'ban',
+        noGuestId: data?.data.punishments?.noGuestId ?? 'ban',
+        noAvatar: data?.data.punishments?.noAvatar ?? 'kick',
+        spamWords: data?.data.punishments?.spamWords ?? 'kick',
+      },
     },
     values: data?.data ? {
       allowAvatars: data.data.allowAvatars,
       allowGuestIds: data.data.allowGuestIds,
       banLevel: data.data.banLevel,
+      punishments: {
+        bannedPatterns: data.data.punishments?.bannedPatterns ?? 'ban',
+        lowLevel: data.data.punishments?.lowLevel ?? 'ban',
+        noGuestId: data.data.punishments?.noGuestId ?? 'ban',
+        noAvatar: data.data.punishments?.noAvatar ?? 'kick',
+        spamWords: data.data.punishments?.spamWords ?? 'kick',
+      },
     } : undefined,
   });
 
@@ -105,20 +127,20 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-6">
       <div>
         <h1 className="text-3xl font-bold" data-testid="heading-settings">Settings</h1>
         <p className="text-muted-foreground mt-1">Configure club and moderation settings</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Club Settings</CardTitle>
-          <CardDescription>Manage club permissions and restrictions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Club Settings</CardTitle>
+              <CardDescription>Manage club permissions and restrictions</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
               <FormField
                 control={form.control}
                 name="allowAvatars"
@@ -180,25 +202,164 @@ export default function Settings() {
                       />
                     </FormControl>
                     <FormDescription>
-                      Members below this level will be auto-banned
+                      Members below this level will be automatically punished
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Punishment Settings
+              </CardTitle>
+              <CardDescription>
+                Choose punishment type for each violation (Ban = Permanent, Kick = Temporary)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="punishments.bannedPatterns"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Banned Name Patterns</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-punishment-banned-patterns">
+                          <SelectValue placeholder="Select punishment type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ban">🔨 Ban (Permanent)</SelectItem>
+                        <SelectItem value="kick">👢 Kick (Temporary)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Users with banned patterns in their name
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <Button
-                type="submit"
-                disabled={saveMutation.isPending}
-                data-testid="button-save-settings"
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {saveMutation.isPending ? "Saving..." : "Save Settings"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+              <FormField
+                control={form.control}
+                name="punishments.lowLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Low Level Users</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-punishment-low-level">
+                          <SelectValue placeholder="Select punishment type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ban">🔨 Ban (Permanent)</SelectItem>
+                        <SelectItem value="kick">👢 Kick (Temporary)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Users below the auto-ban level threshold
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="punishments.noGuestId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Guest IDs</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-punishment-no-guest-id">
+                          <SelectValue placeholder="Select punishment type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ban">🔨 Ban (Permanent)</SelectItem>
+                        <SelectItem value="kick">👢 Kick (Temporary)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      When "Allow Guest IDs" is disabled
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="punishments.noAvatar"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Default Avatars</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-punishment-no-avatar">
+                          <SelectValue placeholder="Select punishment type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ban">🔨 Ban (Permanent)</SelectItem>
+                        <SelectItem value="kick">👢 Kick (Temporary)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      When "Allow Avatars" is disabled
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="punishments.spamWords"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Spam Words</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-punishment-spam-words">
+                          <SelectValue placeholder="Select punishment type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ban">🔨 Ban (Permanent)</SelectItem>
+                        <SelectItem value="kick">👢 Kick (Temporary)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Users who send messages containing spam words
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          <Button
+            type="submit"
+            disabled={saveMutation.isPending}
+            data-testid="button-save-settings"
+            className="w-full sm:w-auto"
+          >
+            <Save className="mr-2 h-4 w-4" />
+            {saveMutation.isPending ? "Saving..." : "Save Settings"}
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 }
